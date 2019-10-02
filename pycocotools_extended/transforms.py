@@ -4,7 +4,6 @@ import albumentations as albu
 def create_transform(aug_fn, size=None, normalize=True, bboxes=True, min_visibility=0., mean=None, std=None,
                      bbox_params=None):
     pipeline = []
-    process_fn = None
 
     if size is not None:
         if type(size) is int:
@@ -34,17 +33,4 @@ def create_transform(aug_fn, size=None, normalize=True, bboxes=True, min_visibil
         pipeline.append(normalize_fn)
 
     pipeline = albu.Compose(pipeline)
-
-    def process(image, bboxes, category_id):
-        r = pipeline(image=image, bboxes=bboxes, category_id=category_id)
-        return r['image'], r['bboxes'], r['category_id']
-
-    def process_without_bboxes(image):
-        r = pipeline(image=image)
-        return r['image']
-
-    if bboxes:
-        process_fn = process
-    else:
-        process_fn = process_without_bboxes
-    return process_fn
+    return pipeline
