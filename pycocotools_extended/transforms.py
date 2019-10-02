@@ -1,8 +1,8 @@
 import albumentations as albu
 
 
-def create_transform(aug_fn, size=None, normalize=True, bboxes=True, min_visibility=0., mean='imagenet', std='imagenet',
-                     bbox_params=None):
+def create_transform(aug_fn, size=None, normalize=True, bboxes=True,  mean='imagenet', std='imagenet',
+                     min_visibility=0., label_field='category_id'):
     pipeline = []
 
     if size is not None:
@@ -13,12 +13,11 @@ def create_transform(aug_fn, size=None, normalize=True, bboxes=True, min_visibil
         aug_fn.insert(0, resize_fn)
 
     if bboxes:
-        if bbox_params is None:
-            bbox_params = {
-                'format': 'coco',
-                'min_visibility': min_visibility,
-                'label_fields': ['category_id']
-            }
+        bbox_params = {
+            'format': 'coco',
+            'min_visibility': min_visibility,
+            'label_fields': [label_field]
+        }
         aug_fn = albu.Compose(aug_fn, bbox_params=bbox_params)
     else:
         aug_fn = albu.Compose(aug_fn)
