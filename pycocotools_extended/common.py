@@ -1,9 +1,12 @@
+import copy
 import os
+from collections import Counter, defaultdict
+
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
-from collections import Counter, defaultdict
-import copy
+import json
+import random
 
 
 def get_colors(num):
@@ -14,19 +17,19 @@ def get_categories(data):
     return {cat_id: cat_data["name"] for cat_id, cat_data in data.cats.items()}
 
 
-def get_meta_by_ann_id(data, ann_id, bboxes=True, categs=True):
+def get_meta_by_ann_id(data, ann_id, bboxes, categs):
     assert type(ann_id) is int
     anns = data.loadAnns(ann_id)
     return restructure_anns(anns, bboxes=bboxes, categs=categs)
 
 
-def get_meta_by_img_id(data, img_id, bboxes=True, categs=True):
+def get_meta_by_img_id(data, img_id, bboxes, categs):
     assert type(img_id) is int
     anns = data.loadAnns(data.getAnnIds(imgIds=img_id))
     return restructure_anns(anns, bboxes=bboxes, categs=categs)
 
 
-def restructure_anns(anns, bboxes=True, categs=True):
+def restructure_anns(anns, bboxes, categs):
     out = defaultdict(list)
     for ann in anns:
         if bboxes:
@@ -56,29 +59,6 @@ def calculate_categories(data):
     for ann in anns:
         c[ann['category_id']] += 1
     return c
-
-
-def _crop_img(img, bbox, padding=0):
-    img_h, img_w = img.shape[:2]
-    x, y, w, h = bbox
-    x1 = max(0, x - padding)
-    y1 = max(0, y - padding)
-    x2 = min(x + w + padding, img_w)
-    y2 = min(y + h + padding, img_h)
-    return img[y1:y2, x1:x2]
-
-
-def get_cropped_bboxes_by_ann_ids(data, ann_ids, padding=0):
-    cropped = []
-    for ann_id in ann_ids:
-        ann = data.loadAnns(ann_id)[0]
-        img_id = ann['image_id']
-        bbox_c = ann['category_id']
-        bbox_loc = ann['bbox']
-        bbox_area = ann['area']
-        img = get_image_by_img_id(img_id)
-        cropped.append(_crop_img(img, bbox_loc, padding))
-    return cropped
 
 
 def merge_datasets(*datasets):
@@ -112,3 +92,28 @@ def merge_datasets(*datasets):
             data["annotations"].append(ann)
             ann_id += 1
     return data
+
+
+def train_test_split(anns_path, train_path='train.json', test_path='test.json', train_size=0.8, random_seed=0):
+    json_data = json.load(open(anns_path))
+    train_data, test_data = copy.deepcopy(json_data), copy.deepcopy(json_data)
+
+    random.seed(random_seed)
+    random.shuffle(test_data["images"])
+
+    split_ind = int(len(test_data["images"]) * train_size)
+    train_data["images"] = test_data["images"][:split_ind]
+    test_data["images"] = test_data["images"][split_ind:]
+
+    train_data["annotations"], test_data["annotations"] = [], []
+    train_imgs = set(map(lambda x: x["id"], train_data["images"]))
+    test_imgs = set(map(lambda x: x["id"], test_data["images"]))
+    for ann in json_data["annotations"]:
+        if ann["image_id"] in train_imgs:
+            train_data["annotations"].append(ann)
+        elif ann["image_id"] in test_imgs:
+            test_data["annotations"].append(ann)
+
+    with open(train_path, 'w') as f_train, open(test_path, 'w') as f_test:
+        json.dump(train_data, f_train)
+        json.dump(test_data, f_test)

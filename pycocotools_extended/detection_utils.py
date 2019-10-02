@@ -1,19 +1,25 @@
-from .common import get_meta_by_img_id, get_image_by_img_id, get_colors, get_categories
-import matplotlib.pyplot as plt
 import matplotlib.patches as patches
+import matplotlib.pyplot as plt
 import numpy as np
 
+from .common import get_meta_by_img_id, get_image_by_img_id, get_colors, get_categories
 
-def display_bboxes_by_img_id(data, img_id, imgs_path, transform=None, ax=None, fontsize=22):
+
+def display_bboxes_by_img_id(data, img_id, imgs_path, transform=None, ax=None, fontsize=22, cat_names=None,
+                             colors=None):
     assert type(img_id) is int
-    out = get_meta_by_img_id(data, img_id)
-    bboxes, categs = out['bboxes'], out['categs']
+    out = get_meta_by_img_id(data, img_id, bboxes=True, categs=True)
     img = get_image_by_img_id(data, img_id, imgs_path)
-    cat_names = get_categories(data)
-    colors = get_colors(len(cat_names))
+
+    bboxes, categs = out['bboxes'], out['categs']
+    if cat_names is None:
+        cat_names = get_categories(data)
+    if colors is None:
+        colors = get_colors(len(cat_names))
 
     if transform is not None:
-        img, bboxes, categs = transform(img, bboxes, categs)
+        out = transform(image=img, bboxes=bboxes, category_id=categs)
+        img, bboxes, categs = out['image'], out['bboxes'], out['category_id']
 
     if ax is None:
         fig, ax = plt.subplots(1, figsize=(30, 20))
@@ -47,3 +53,23 @@ def filter_ann_ids_by_min_area(data, ann_ids, min_area=0):
             continue
         filtered_anns.append(ann['id'])
     return filtered_anns
+
+
+def crop_image_by_bbox(img, bbox, padding=0):
+    img_h, img_w = img.shape[:2]
+    x, y, w, h = bbox
+    x1 = max(0, x - padding)
+    y1 = max(0, y - padding)
+    x2 = min(x + w + padding, img_w)
+    y2 = min(y + h + padding, img_h)
+    return img[y1:y2, x1:x2]
+
+
+def get_cropped_bboxes_by_ann_ids(data, ann_ids, imgs_path, padding=0):
+    cropped = []
+    for ann_id in ann_ids:
+        ann = data.loadAnns(ann_id)[0]
+        img_id, bbox_loc, bbox_c = ann['image_id'], ann['bbox'], ann['category_id']
+        img = get_image_by_img_id(data, img_id, imgs_path)
+        cropped.append(crop_image_by_bbox(img, bbox_loc, padding))
+    return cropped

@@ -1,7 +1,7 @@
 import albumentations as albu
 
 
-def create_transform(aug_fn, size=None, normalize=True, bboxes=True, min_visibility=0., mean=None, std=None,
+def create_transform(aug_fn, size=None, normalize=True, bboxes=True, min_visibility=0., mean='imagenet', std='imagenet',
                      bbox_params=None):
     pipeline = []
 
@@ -19,18 +19,24 @@ def create_transform(aug_fn, size=None, normalize=True, bboxes=True, min_visibil
                 'min_visibility': min_visibility,
                 'label_fields': ['category_id']
             }
+        aug_fn = albu.Compose(aug_fn, bbox_params=bbox_params)
     else:
-        bbox_params = None
-    aug_fn = albu.Compose(aug_fn, bbox_params=bbox_params)
+        aug_fn = albu.Compose(aug_fn)
     pipeline.append(aug_fn)
 
     if normalize:
-        if mean is None:
-            mean = [0.485, 0.456, 0.406]
-        if std is None:
-            std = [0.229, 0.224, 0.225]
+        mean, std = _get_mean_std(mean, std)
         normalize_fn = albu.Normalize(mean=mean, std=std)
         pipeline.append(normalize_fn)
 
     pipeline = albu.Compose(pipeline)
     return pipeline
+
+
+def _get_mean_std(mean, std):
+    if mean == 'imagenet':
+        mean = [0.485, 0.456, 0.406]
+    if std == 'imagenet':
+        std = [0.229, 0.224, 0.225]
+    return mean, std
+
