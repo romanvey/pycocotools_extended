@@ -49,16 +49,15 @@ def get_image_by_ann_id(data, ann_id, imgs_path):
     if type(ann_id) is not int:
         raise ValueError('ann_id should be int!')
     img_id = data.getImgIds(annIds=ann_id)[0]
-    return get_image_by_img_id(img_id, imgs_path)
+    return get_image_by_img_id(data, img_id, imgs_path)
 
 
 def get_image_by_img_id(data, img_id, imgs_path):
     if type(img_id) is not int:
         raise ValueError('img_id should be int!')
     img_path = os.path.join(imgs_path, data.loadImgs(img_id)[0]["file_name"])
-    if not os.path.exists(img_path):
-        raise ValueError('No such file: [{}]'.format(img_path))
-    img = cv2.cvtColor(cv2.imread(img_path), cv2.COLOR_BGR2RGB)
+    img = _read_img(img_path)
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     return img
 
 
@@ -198,6 +197,39 @@ def rename_categories(anns_path, mapping, save_path):
 
     output = data.copy()
     output['categories'] = new_categs
+
+    with open(save_path, 'w') as f:
+        json.dump(output, f)
+
+
+def _read_img(img_path):
+    img = cv2.imread(img_path)
+    if img is None:
+        raise ValueError('No image: [{}]'.format(img_path))
+    return img
+
+
+def clean(anns_path, save_path):
+    data = json.load(open(anns_path))
+    new_imgs = []
+    new_anns = []
+    new_img_ids = set()
+
+    for image in data['images']:
+        try:
+            _ = _read_img(image['filename'])
+            new_imgs.append(image)
+            new_img_ids.add(image['id'])
+        except ValueError:
+            pass
+
+    for ann in data['annotations']:
+        if ann['image_id'] in new_img_ids:
+            new_anns.append(ann)
+
+    output = data.copy()
+    output['images'] = new_imgs
+    output['annotations'] = new_anns
 
     with open(save_path, 'w') as f:
         json.dump(output, f)

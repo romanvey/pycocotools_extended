@@ -57,3 +57,8 @@ class COCOext:
     def rename_categories(self, mapping, save_path):
         common.rename_categories(self.anns_path, mapping, save_path)
         return COCOext(save_path, self.imgs_path)
+
+    def clean(self, save_path):
+        common.clean(self.anns_path, save_path)
+        return COCOext(save_path, self.imgs_path)
+
