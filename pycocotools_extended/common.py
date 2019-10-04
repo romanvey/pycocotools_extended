@@ -13,9 +13,11 @@ def get_colors(num):
     return plt.cm.rainbow(np.linspace(0, 1, num))
 
 
-def get_categories(data):
+def get_cat2name(data):
     return {cat_id: cat_data["name"] for cat_id, cat_data in data.cats.items()}
 
+def get_name2cat(data):
+    return {cat_data["name"]: cat_id  for cat_id, cat_data in data.cats.items()}
 
 def get_meta_by_ann_id(data, ann_id, bboxes, categs):
     assert type(ann_id) is int
@@ -117,3 +119,77 @@ def train_test_split(anns_path, train_path='train.json', test_path='test.json', 
     with open(train_path, 'w') as f_train, open(test_path, 'w') as f_test:
         json.dump(train_data, f_train)
         json.dump(test_data, f_test)
+
+
+def map_categories(anns_path, mapping, save_path, supercategory=None):
+    data = json.load(open(anns_path))
+    if supercategory is None:
+        supercategory = data['categories'][0]['supercategory']
+
+    new_categs = []
+    new_anns = []
+    new_imgs = []
+    new_img_ids = set()
+    new_categ_ids = set()
+
+    cat2name = dict()
+    name2cat = dict()
+    for categ in data['categories']:
+        cat2name[categ['id']] = categ['name']
+        name2cat[categ['name']] = categ['id']
+
+    final_mapping = dict()
+    for new_categ_id, new_categ_name in mapping.items():
+        if new_categ_name in name2cat:
+            old_categ_id = name2cat[new_categ_name]
+            final_mapping[old_categ_id] = new_categ_id
+        else:
+            new_categ_ids.add(new_categ_id)
+
+    for categ in data['categories']:
+        if categ['id'] in final_mapping:
+            new_categ = categ.copy()
+            new_categ['id'] = final_mapping[categ['id']]
+            new_categs.append(new_categ)
+
+    for new_categ_id in new_categ_ids:
+        new_categ = dict()
+        new_categ['supercategory'] = supercategory
+        new_categ['id'] = new_categ_id
+        new_categ['name'] = mapping[new_categ_id]
+        new_categs.append(new_categ)
+
+    for ann in data['annotations']:
+        if ann['category_id'] in final_mapping:
+            new_ann = ann.copy()
+            new_ann['category_id'] = final_mapping[ann['category_id']]
+            new_anns.append(new_ann)
+            new_img_ids.add(ann['image_id'])
+
+    for image in data['images']:
+        if image['id'] in new_img_ids:
+            new_imgs.append(image)
+
+    output = dict()
+    output['categories'] = new_categs
+    output['annotations'] = new_anns
+    output['images'] = new_imgs
+
+    with open(save_path, 'w') as f:
+        json.dump(output, f)
+
+
+def rename_categories(anns_path, mapping, save_path):
+    data = json.load(open(anns_path))
+    new_categs = []
+    for categ in data['categories']:
+        new_categ = categ.copy()
+        if new_categ['id'] in mapping:
+            new_categ['name'] = mapping[new_categ['id']]
+        new_categs.append(new_categ)
+
+    output = data.copy()
+    output['categories'] = new_categs
+
+    with open(save_path, 'w') as f:
+        json.dump(output, f)

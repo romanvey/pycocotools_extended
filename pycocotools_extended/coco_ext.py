@@ -10,8 +10,9 @@ class COCOext:
         self.anns_path = anns_path
         self.imgs_path = imgs_path
 
-        self.cat_names = common.get_categories(self.coco)
-        self.colors = common.get_colors(len(self.cat_names))
+        self.cat2name = common.get_cat2name(self.coco)
+        self.name2cat = common.get_name2cat(self.coco)
+        self.colors = common.get_colors(len(self.cat2name))
 
     def __call__(self):
         return self.coco
@@ -36,11 +37,11 @@ class COCOext:
 
     def display_bboxes_by_img_id(self, img_id, transform=None, **kwargs):
         return du.display_bboxes_by_img_id(self.coco, img_id, self.imgs_path, transform=transform, colors=self.colors,
-                                           cat_names=self.cat_names, **kwargs)
+                                           cat_names=self.cat2name, **kwargs)
 
     def display_bboxes_by_img_ids(self, img_ids, transform=None, **kwargs):
         return du.display_bboxes_by_img_ids(self.coco, img_ids, self.imgs_path, transform=transform, colors=self.colors,
-                                            cat_names=self.cat_names, **kwargs)
+                                            cat_names=self.cat2name, **kwargs)
 
     def filter_ann_ids_by_min_area(self, ann_ids, min_area=0):
         return du.filter_ann_ids_by_min_area(self.coco, ann_ids, min_area)
@@ -49,5 +50,10 @@ class COCOext:
         common.train_test_split(self.anns_path, train_path, test_path, train_size, random_seed)
         return COCOext(train_path, self.imgs_path), COCOext(test_path, self.imgs_path)
 
-    def map_category(self, category_id):
-        return self.cat_names[category_id]
+    def map_categories(self, mapping, save_path, supercategory=None):
+        common.map_categories(self.anns_path, mapping, save_path, supercategory)
+        return COCOext(save_path, self.imgs_path)
+
+    def rename_categories(self, mapping, save_path):
+        common.rename_categories(self.anns_path, mapping, save_path)
+        return COCOext(save_path, self.imgs_path)

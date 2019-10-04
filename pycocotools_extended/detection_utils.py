@@ -2,20 +2,20 @@ import matplotlib.patches as patches
 import matplotlib.pyplot as plt
 import numpy as np
 
-from .common import get_meta_by_img_id, get_image_by_img_id, get_colors, get_categories
+import pycocotools_extended.common as common
 
 
 def display_bboxes_by_img_id(data, img_id, imgs_path, transform=None, ax=None, fontsize=22, cat_names=None,
                              colors=None):
     assert type(img_id) is int
-    out = get_meta_by_img_id(data, img_id, bboxes=True, categs=True)
-    img = get_image_by_img_id(data, img_id, imgs_path)
+    out = common.get_meta_by_img_id(data, img_id, bboxes=True, categs=True)
+    img = common.get_image_by_img_id(data, img_id, imgs_path)
 
     bboxes, categs = out['bboxes'], out['categs']
     if cat_names is None:
-        cat_names = get_categories(data)
+        cat_names = common.get_cat2name(data)
     if colors is None:
-        colors = get_colors(len(cat_names))
+        colors = common.get_colors(len(cat_names))
 
     if transform is not None:
         out = transform(image=img, bboxes=bboxes, category_id=categs)
@@ -66,10 +66,11 @@ def crop_image_by_bbox(img, bbox, padding=0):
 
 
 def get_cropped_bboxes_by_ann_ids(data, ann_ids, imgs_path, padding=0):
-    cropped = []
+    cropped_imgs = []
     for ann_id in ann_ids:
         ann = data.loadAnns(ann_id)[0]
         img_id, bbox_loc, bbox_c = ann['image_id'], ann['bbox'], ann['category_id']
-        img = get_image_by_img_id(data, img_id, imgs_path)
-        cropped.append(crop_image_by_bbox(img, bbox_loc, padding))
-    return cropped
+        img = common.get_image_by_img_id(data, img_id, imgs_path)
+        cropped_img = crop_image_by_bbox(img, bbox_loc, padding)
+        cropped_imgs.append(cropped_img)
+    return cropped_imgs
