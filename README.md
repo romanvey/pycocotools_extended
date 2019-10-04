@@ -13,3 +13,4 @@ TODO:
 - category_mapping
 - multiple datasets with probability to COCOdataset (or multiCOCOdataset)(?)
 - output to eval format (?)
+- assert to ValueError

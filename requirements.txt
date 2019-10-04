@@ -1,0 +1,6 @@
+Cython>=0.29.13
+pycocotools>=2.0.0
+albumentations>=0.3.3
+numpy>=1.17.2
+opencv-python>=4.1.1.26
+torch>=1.0.0

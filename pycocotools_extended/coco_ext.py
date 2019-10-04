@@ -1,4 +1,4 @@
-from pycocotools.coco import COCO
+import pycocotools.coco
 
 import pycocotools_extended.common as common
 import pycocotools_extended.detection_utils as du
@@ -6,7 +6,7 @@ import pycocotools_extended.detection_utils as du
 
 class COCOext:
     def __init__(self, anns_path, imgs_path):
-        self.coco = COCO(annotation_file=anns_path)
+        self.coco = pycocotools.coco.COCO(annotation_file=anns_path)
         self.anns_path = anns_path
         self.imgs_path = imgs_path
 
@@ -46,4 +46,8 @@ class COCOext:
         return du.filter_ann_ids_by_min_area(self.coco, ann_ids, min_area)
 
     def train_test_split(self, train_path='train.json', test_path='test.json', train_size=0.8, random_seed=0):
-        return common.train_test_split(self.anns_path, train_path, test_path, train_size, random_seed)
+        common.train_test_split(self.anns_path, train_path, test_path, train_size, random_seed)
+        return COCOext(train_path, self.imgs_path), COCOext(test_path, self.imgs_path)
+
+    def map_category(self, category_id):
+        return self.cat_names[category_id]
