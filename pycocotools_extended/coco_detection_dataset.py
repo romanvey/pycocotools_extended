@@ -18,8 +18,8 @@ class COCODetectionDataset:
             height, width, _ = img.shape
             img = self._preprocess_img(img)
             target = self._preprocess_target(bboxes, categs, height, width)
-        except:
-            print(self.get_img_path(idx))
+        except ValueError as e:
+            print(e)
             return self[random.randrange(len(self))]
         return img, target
 
