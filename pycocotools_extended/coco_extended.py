@@ -4,7 +4,7 @@ import pycocotools_extended.common as common
 import pycocotools_extended.detection_utils as du
 
 
-class COCOext:
+class COCOextended:
     def __init__(self, anns_path, imgs_path):
         self.coco = pycocotools.coco.COCO(annotation_file=anns_path)
         self.anns_path = anns_path
@@ -48,17 +48,17 @@ class COCOext:
 
     def train_test_split(self, train_path='train.json', test_path='test.json', train_size=0.8, random_seed=0):
         common.train_test_split(self.anns_path, train_path, test_path, train_size, random_seed)
-        return COCOext(train_path, self.imgs_path), COCOext(test_path, self.imgs_path)
+        return COCOextended(train_path, self.imgs_path), COCOextended(test_path, self.imgs_path)
 
     def map_categories(self, mapping, save_path, supercategory=None):
         common.map_categories(self.anns_path, mapping, save_path, supercategory)
-        return COCOext(save_path, self.imgs_path)
+        return COCOextended(save_path, self.imgs_path)
 
     def rename_categories(self, mapping, save_path):
         common.rename_categories(self.anns_path, mapping, save_path)
-        return COCOext(save_path, self.imgs_path)
+        return COCOextended(save_path, self.imgs_path)
 
     def clean(self, save_path):
         common.clean(self.anns_path, save_path)
-        return COCOext(save_path, self.imgs_path)
+        return COCOextended(save_path, self.imgs_path)
 
