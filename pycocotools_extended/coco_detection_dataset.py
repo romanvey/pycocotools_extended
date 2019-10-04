@@ -6,7 +6,7 @@ import random
 import pycocotools_extended.coco_ext
 
 
-class COCOdataset:
+class COCODetectionDataset:
     def __init__(self, anns_path, imgs_path, transform=None):
         self.coco_ext = pycocotools_extended.coco_ext.COCOext(anns_path=anns_path, imgs_path=imgs_path)
         self.img_ids = list(self.coco_ext().getImgIds())
