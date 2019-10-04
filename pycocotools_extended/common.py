@@ -16,17 +16,21 @@ def get_colors(num):
 def get_cat2name(data):
     return {cat_id: cat_data["name"] for cat_id, cat_data in data.cats.items()}
 
+
 def get_name2cat(data):
     return {cat_data["name"]: cat_id  for cat_id, cat_data in data.cats.items()}
 
+
 def get_meta_by_ann_id(data, ann_id, bboxes, categs):
-    assert type(ann_id) is int
+    if type(ann_id) is int:
+        raise ValueError('ann_id should be int!')
     anns = data.loadAnns(ann_id)
     return restructure_anns(anns, bboxes=bboxes, categs=categs)
 
 
 def get_meta_by_img_id(data, img_id, bboxes, categs):
-    assert type(img_id) is int
+    if type(img_id) is int:
+        raise ValueError('ann_id should be int!')
     anns = data.loadAnns(data.getAnnIds(imgIds=img_id))
     return restructure_anns(anns, bboxes=bboxes, categs=categs)
 
@@ -42,13 +46,15 @@ def restructure_anns(anns, bboxes, categs):
 
 
 def get_image_by_ann_id(data, ann_id, imgs_path):
-    assert type(ann_id) is int
+    if type(ann_id) is int:
+        raise ValueError('ann_id should be int!')
     img_id = data.getImgIds(annIds=ann_id)[0]
     return get_image_by_img_id(img_id, imgs_path)
 
 
 def get_image_by_img_id(data, img_id, imgs_path):
-    assert type(img_id) is int
+    if type(img_id) is int:
+        raise ValueError('img_id should be int!')
     img_path = os.path.join(imgs_path, data.loadImgs(img_id)[0]["file_name"])
     img = cv2.cvtColor(cv2.imread(img_path), cv2.COLOR_BGR2RGB)
     return img
