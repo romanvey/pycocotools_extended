@@ -7,10 +7,10 @@ TODO:
 - category counter, merge_datasets to common (Done)
 - train_test_split, save to common (Done)
 - refactor process for mask support in the future (Done)
-- move example to jupyter notebook
-- setup.py, README.md, docs and examples
-- show category visualization in the examples
-- category_mapping
-- multiple datasets with probability to COCOdataset (or multiCOCOdataset)(?)
-- output to eval format (?)
-- assert to ValueError
+- setup.py, README.md, docs and examples (Done)
+- multiple datasets with probability to COCOdataset (or multiCOCOdataset) (Canceled)
+- move example to jupyter notebook (Canceled)
+- category_mapping (Done)
+- output to eval format (?) (Done)
+- assert to ValueError (Done)
+- create notebook showcase with categ visualizations and all functionality

@@ -7,6 +7,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import json
 import random
+from pycocotools.coco import COCO
+from pycocotools.cocoeval import COCOeval
 
 
 def get_colors(num):
@@ -75,6 +77,12 @@ def calculate_categories(data):
 
 
 def merge_datasets(*datasets):
+    """
+    :param datasets:
+    (dataset: COCO, imgs_path: str),...
+    :return:
+    merged_dataset: COCO
+    """
     data, img_prefix = datasets[0]
     data = copy.deepcopy(data)
 
@@ -237,3 +245,24 @@ def clean(anns_path, save_path):
 
     with open(save_path, 'w') as f:
         json.dump(output, f)
+
+
+def print_summary(ann_path, result_path, dataset_name='Default'):
+    """ Prints summary of a given submission file in COCO format
+    Args:
+        ann_path (str): path to json file with annotations
+        result_path (str): path to file containing results in COCO format
+        dataset_name (str): dataset name
+    Returns:
+        None
+    """
+    coco_dataset = COCO(ann_path)
+    coco_result = coco_dataset.loadRes(result_path)
+
+    imgs = coco_dataset.getImgIds()
+    cocoEval = COCOeval(coco_dataset, coco_result, 'bbox')
+    cocoEval.params.imgIds = imgs
+    cocoEval.evaluate()
+    cocoEval.accumulate()
+    print('{0} {1} {0}'.format('=' * 30, dataset_name))
+    cocoEval.summarize()
