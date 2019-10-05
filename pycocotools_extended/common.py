@@ -55,10 +55,14 @@ def get_image_by_ann_id(data, ann_id, imgs_path):
 def get_image_by_img_id(data, img_id, imgs_path):
     if type(img_id) is not int:
         raise ValueError('img_id should be int!')
-    img_path = os.path.join(imgs_path, data.loadImgs(img_id)[0]["file_name"])
+    img_path = get_image_path_by_img_id(data, img_id, imgs_path)
     img = _read_img(img_path)
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     return img
+
+
+def get_image_path_by_img_id(data, img_id, imgs_path):
+    return os.path.join(imgs_path, data.loadImgs(img_id)[0]["file_name"])
 
 
 def calculate_categories(data):

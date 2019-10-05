@@ -38,8 +38,7 @@ class COCOdetection:
 
     def get_img_path(self, idx):
         img_id = self.img_ids[idx]
-        img_path = self.coco_ext().loadImgs(img_id)[0]['file_name']
-        return os.path.join(self.coco_ext.imgs_path, img_path)
+        return self.coco_ext.get_image_path_by_img_id(img_id)
 
     @staticmethod
     def _preprocess_img(img):

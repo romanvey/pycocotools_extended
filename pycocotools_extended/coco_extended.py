@@ -29,6 +29,9 @@ class COCOextended:
     def get_image_by_img_id(self, img_id):
         return common.get_image_by_img_id(self.coco, img_id, self.imgs_path)
 
+    def get_image_path_by_img_id(self, img_id):
+        return common.get_image_path_by_img_id(self.coco, img_id, self.imgs_path)
+
     def calculate_categories(self):
         return common.calculate_categories(self.coco)
 
