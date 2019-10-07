@@ -62,6 +62,5 @@ class COCOextended:
         return COCOextended(save_path, self.imgs_path)
 
     def clean(self, save_path):
-        common.clean(self.anns_path, save_path)
+        common.clean(self.anns_path, self.imgs_path, save_path)
         return COCOextended(save_path, self.imgs_path)
-

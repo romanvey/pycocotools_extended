@@ -44,7 +44,7 @@ def restructure_anns(anns, bboxes, categs):
             out['bboxes'].append(ann['bbox'])
         if categs:
             out['categs'].append(ann['category_id'])
-    return out
+    return dict(out)
 
 
 def get_image_by_ann_id(data, ann_id, imgs_path):
@@ -221,7 +221,7 @@ def _read_img(img_path):
     return img
 
 
-def clean(anns_path, save_path):
+def clean(anns_path, imgs_path, save_path):
     data = json.load(open(anns_path))
     new_imgs = []
     new_anns = []
@@ -229,7 +229,7 @@ def clean(anns_path, save_path):
 
     for image in data['images']:
         try:
-            _ = _read_img(image['file_name'])
+            _ = _read_img(os.path.join(imgs_path, image['file_name']))
             new_imgs.append(image)
             new_img_ids.add(image['id'])
         except ValueError:
@@ -260,9 +260,9 @@ def print_summary(ann_path, result_path, dataset_name='Default'):
     coco_result = coco_dataset.loadRes(result_path)
 
     imgs = coco_dataset.getImgIds()
-    cocoEval = COCOeval(coco_dataset, coco_result, 'bbox')
-    cocoEval.params.imgIds = imgs
-    cocoEval.evaluate()
-    cocoEval.accumulate()
+    coco_eval = COCOeval(coco_dataset, coco_result, 'bbox')
+    coco_eval.params.imgIds = imgs
+    coco_eval.evaluate()
+    coco_eval.accumulate()
     print('{0} {1} {0}'.format('=' * 30, dataset_name))
-    cocoEval.summarize()
+    coco_eval.summarize()
