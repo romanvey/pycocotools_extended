@@ -228,7 +228,6 @@ def clean(anns_path, save_path):
     new_img_ids = set()
 
     for image in data['images']:
-        print(image)
         try:
             _ = _read_img(image['file_name'])
             new_imgs.append(image)
