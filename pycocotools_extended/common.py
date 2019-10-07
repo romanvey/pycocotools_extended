@@ -229,7 +229,7 @@ def clean(anns_path, save_path):
 
     for image in data['images']:
         try:
-            _ = _read_img(image['filename'])
+            _ = _read_img(image['file_name'])
             new_imgs.append(image)
             new_img_ids.add(image['id'])
         except ValueError:
