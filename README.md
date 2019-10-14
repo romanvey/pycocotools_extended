@@ -1,6 +1,9 @@
 ## pycocotools_extended
 
-### Usage example: examples/showcase.ipynb
+### Usage example: 
+examples/showcase.ipynb
+
+(or altirnatively: http://bit.ly/2ONEaku)
 
 #### Install:
 ```
